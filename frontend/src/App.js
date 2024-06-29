@@ -4,100 +4,134 @@ import './App.css';
 
 const App = () => {
   const [leagues, setLeagues] = useState([]);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [members, setMembers] = useState('');
+  const [formState, setFormState] = useState({
+    title: '',
+    description: '',
+    members: '',
+    inviteEmail: '',
+  });
   const [selectedLeague, setSelectedLeague] = useState(null);
-  const [inviteEmail, setInviteEmail] = useState('');
   const [formType, setFormType] = useState(null);
   const [emailError, setEmailError] = useState('');
+
+  // const url = "http://localhost:5000";
+  const url="https://league-curd-backendapi.vercel.app";
 
   useEffect(() => {
     fetchLeagues();
   }, []);
-  const url="https://league-curd-backendapi.vercel.app";
-  const fetchLeagues = () => {
-    axios.get(`${url}/leagues`)
-      .then(response => setLeagues(response.data))
-      .catch(error => console.error(error));
+
+  const fetchLeagues = async () => {
+    try {
+      const response = await axios.get(`${url}/leagues`);
+      setLeagues(response.data);
+    } catch (error) {
+      console.error('Error fetching leagues:', error);
+    }
   };
 
   const openForm = (type, league = null) => {
     setSelectedLeague(league);
     setFormType(type);
+
     if (league) {
-      setTitle(league.league_title);
-      setDescription(league.league_description);
-      setMembers(league.members);
+      setFormState({
+        title: league.league_title,
+        description: league.league_description,
+        members: league.members,
+        inviteEmail: '',
+      });
     } else {
-      setTitle('');
-      setDescription('');
-      setMembers('');
+      setFormState({
+        title: '',
+        description: '',
+        members: '',
+        inviteEmail: '',
+      });
     }
   };
 
   const closeForm = () => {
     setSelectedLeague(null);
     setFormType(null);
+    setFormState({
+      title: '',
+      description: '',
+      members: '',
+      inviteEmail: '',
+    });
   };
 
-  const saveLeague = () => {
-    if (!title || !description || !members) {
-      alert('Please enter name, description, and member.');
+  const saveLeague = async () => {
+   const { title, description, members } = formState;
+
+  if (!title || !description) {
+    alert('Please enter league name and description.');
+    return;
+  }
+
+  const newLeague = {
+    league_title: title,
+    league_description: description,
+  };
+
+  if (formType === 'edit') {
+    if (!members) {
+      alert('Please enter at least one member.');
       return;
     }
+    newLeague.members = members;
+  }
 
-    const updatedLeague = {
-      league_title: title,
-      league_description: description,
-      members: members,
-    };
-
+  try {
     if (selectedLeague) {
-      axios.put(`${url}/leagues/${selectedLeague._id}`, updatedLeague)
-        .then(response => {
-          fetchLeagues();
-          closeForm();
-        })
-        .catch(error => console.error(error));
+      await axios.put(`${url}/leagues/${selectedLeague._id}`, newLeague);
     } else {
-      axios.post(`${url}/leagues`, updatedLeague)
-        .then(response => {
-          fetchLeagues();
-          closeForm();
-        })
-        .catch(error => console.error(error));
+      await axios.post(`${url}/leagues`, newLeague);
+    }
+    fetchLeagues();
+    closeForm();
+  } catch (error) {
+    console.error('Error saving league:', error);
+  }
+};
+
+  const deleteLeague = async (id) => {
+    try {
+      await axios.delete(`${url}/leagues/${id}`);
+      fetchLeagues();
+      closeForm();
+    } catch (error) {
+      console.error('Error deleting league:', error);
     }
   };
 
-  const deleteLeague = (id) => {
-    axios.delete(`${url}/leagues/${id}`)
-      .then(() => {
-        fetchLeagues();
-        closeForm();
-      })
-      .catch(error => console.error(error));
-  };
-
-  const inviteFriend = (leagueId) => {
+  const inviteFriend = async (leagueId) => {
+    const { inviteEmail } = formState;
+  
     if (!inviteEmail || !validateEmail(inviteEmail)) {
       alert('Invalid email address');
       return;
     }
+  
     const league = leagues.find(l => l._id === leagueId);
-    if (league.members.includes(inviteEmail)) {
-      alert('This email is already invited.');
-      fetchLeagues();
-      closeForm();
+  
+    if (!league) {
+      console.error('League not found');
       return;
     }
   
-    axios.post(`${url}/leagues/invite/${leagueId}`, { email: inviteEmail })
-      .then(response => {
+    if (!league.members || !league.members.includes(inviteEmail)) {
+      try {
+        await axios.post(`${url}/leagues/invite/${leagueId}`, { email: inviteEmail });
         fetchLeagues();
         closeForm();
-      })
-      .catch(error => console.error(error));
+      } catch (error) {
+        console.error('Error inviting friend:', error);
+      }
+    } else {
+      alert('This email is already invited.');
+    }
   };
 
   const validateEmail = (email) => {
@@ -106,12 +140,24 @@ const App = () => {
   };
 
   const handleEmailChange = (e) => {
-    setInviteEmail(e.target.value);
+    setFormState({
+      ...formState,
+      inviteEmail: e.target.value,
+    });
+
     if (validateEmail(e.target.value)) {
       setEmailError('');
     } else {
       setEmailError('Invalid email address');
     }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormState({
+      ...formState,
+      [name]: value,
+    });
   };
 
   return (
@@ -152,40 +198,44 @@ const App = () => {
             {formType !== 'invite' && (
               <>
                 <h4>Name</h4>
-                <input 
-                  type="text" 
-                  value={title} 
-                  onChange={(e) => setTitle(e.target.value)} 
-                  placeholder="Enter League Name" 
+                <input
+                  type="text"
+                  name="title"
+                  value={formState.title}
+                  onChange={handleInputChange}
+                  placeholder="Enter League Name"
                 />
                 <h4>Description</h4>
                 <input
-                  type="text" 
-                  value={description} 
-                  onChange={(e) => setDescription(e.target.value)} 
+                  type="text"
+                  name="description"
+                  value={formState.description}
+                  onChange={handleInputChange}
                   placeholder="Enter League Description"
                 />
-                {selectedLeague && (
-          <>
-            <h4>Member</h4>
-            <input
-              value={inviteEmail}
-              pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
-              onChange={e => setInviteEmail(e.target.value)}
-              placeholder="Enter Email"
-            />
-          </>
-        )}
+              
+                {formType === 'edit' && (
+                  <>
+                    <h4>Member</h4>
+                    <input
+                      type="text"
+                      name="members"
+                      value={formState.members}
+                      onChange={handleInputChange}
+                      placeholder="Enter Member Email"
+                    />
+                  </>
+                )}
                 <button type="button" onClick={saveLeague}>Save</button>
               </>
             )}
             {formType === 'invite' && (
               <>
-                <input 
-                  type="text" 
-                  value={inviteEmail} 
-                  onChange={handleEmailChange} 
-                  placeholder="Enter Email" 
+                <input
+                  type="text"
+                  value={formState.inviteEmail}
+                  onChange={handleEmailChange}
+                  placeholder="Enter Email"
                 />
                 {emailError && <span className="error">{emailError}</span>}
                 <button type="button" onClick={() => inviteFriend(selectedLeague._id)}>Send Invite</button>
