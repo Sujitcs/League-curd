@@ -6,14 +6,16 @@ const App = () => {
   const [leagues, setLeagues] = useState([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [members, setMembers] = useState('');
   const [selectedLeague, setSelectedLeague] = useState(null);
   const [inviteEmail, setInviteEmail] = useState('');
   const [formType, setFormType] = useState(null);
+  const [emailError, setEmailError] = useState('');
 
   useEffect(() => {
     fetchLeagues();
   }, []);
- const url="https://league-curd-backendapi.vercel.app";
+  const url="https://league-curd-backendapi.vercel.app";
   const fetchLeagues = () => {
     axios.get(`${url}/leagues`)
       .then(response => setLeagues(response.data))
@@ -26,11 +28,11 @@ const App = () => {
     if (league) {
       setTitle(league.league_title);
       setDescription(league.league_description);
-      setInviteEmail(league.members || '');
+      setMembers(league.members);
     } else {
       setTitle('');
       setDescription('');
-      setInviteEmail('');
+      setMembers('');
     }
   };
 
@@ -40,15 +42,15 @@ const App = () => {
   };
 
   const saveLeague = () => {
-    if (!title || !description) {
-      alert('Please enter both name and description.');
+    if (!title || !description || !members) {
+      alert('Please enter name, description, and member.');
       return;
     }
 
     const updatedLeague = {
       league_title: title,
       league_description: description,
-      members: inviteEmail,
+      members: members,
     };
 
     if (selectedLeague) {
@@ -97,10 +99,19 @@ const App = () => {
       })
       .catch(error => console.error(error));
   };
-  
+
   const validateEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
+  };
+
+  const handleEmailChange = (e) => {
+    setInviteEmail(e.target.value);
+    if (validateEmail(e.target.value)) {
+      setEmailError('');
+    } else {
+      setEmailError('Invalid email address');
+    }
   };
 
   return (
@@ -114,7 +125,7 @@ const App = () => {
           <tr>
             <th>Name</th>
             <th>Description</th>
-            <th>Members</th>
+            <th>Member</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -134,17 +145,29 @@ const App = () => {
         </tbody>
       </table>
 
-      {(formType === 'create' || formType === 'edit') && (
+      {formType && (
         <div className="form-container">
-          <h2>{selectedLeague ? 'Edit League' : 'Create League'}</h2>
+          <h2>{formType === 'create' ? 'Create League' : formType === 'edit' ? 'Edit League' : 'Invite Friend'}</h2>
           <form>
-            <h4>Name</h4>
-            <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Name" />
-            <h4>Description</h4>
-            <input value={description} onChange={e => setDescription(e.target.value)} placeholder="Description" />
-             {selectedLeague && (
+            {formType !== 'invite' && (
+              <>
+                <h4>Name</h4>
+                <input 
+                  type="text" 
+                  value={title} 
+                  onChange={(e) => setTitle(e.target.value)} 
+                  placeholder="Enter League Name" 
+                />
+                <h4>Description</h4>
+                <input
+                  type="text" 
+                  value={description} 
+                  onChange={(e) => setDescription(e.target.value)} 
+                  placeholder="Enter League Description"
+                />
+                {selectedLeague && (
           <>
-            <h4>Members</h4>
+            <h4>Member</h4>
             <input
               value={inviteEmail}
               pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
@@ -153,17 +176,22 @@ const App = () => {
             />
           </>
         )}
-            <button type="button" onClick={saveLeague}>{selectedLeague ? 'Save Changes' : 'Create League'}</button>
-          </form>
-        </div>
-      )}
-
-      {formType === 'invite' && selectedLeague && (
-        <div className="form-container">
-          <h2>Invite Friend</h2>
-          <form>
-            <input value={inviteEmail} pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$" onChange={e => setInviteEmail(e.target.value)} placeholder="Enter Email" />
-            <button type="button" onClick={() => inviteFriend(selectedLeague._id)}>Send Invite</button>
+                <button type="button" onClick={saveLeague}>Save</button>
+              </>
+            )}
+            {formType === 'invite' && (
+              <>
+                <input 
+                  type="text" 
+                  value={inviteEmail} 
+                  onChange={handleEmailChange} 
+                  placeholder="Enter Email" 
+                />
+                {emailError && <span className="error">{emailError}</span>}
+                <button type="button" onClick={() => inviteFriend(selectedLeague._id)}>Send Invite</button>
+              </>
+            )}
+            <button type="button" onClick={closeForm}>Cancel</button>
           </form>
         </div>
       )}
