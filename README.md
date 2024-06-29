@@ -1,7 +1,7 @@
 see all data--- 
-https://league-curd-frontend.vercel.app/
+https://league-curd-frontend.vercel.app/  </br>
 backend datalistapi--- 
-https://league-curd-backendapi.vercel.app/leagues
+https://league-curd-backendapi.vercel.app/leagues  </br>
 individual id check-- 
 https://league-curd-backendapi.vercel.app/leagues/<put_user_id>
 ![1](https://github.com/Sujitcs/League-curd/assets/132594980/ea04e36c-fb8f-4adc-86a7-69b636ab24e7)
