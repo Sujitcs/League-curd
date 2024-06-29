@@ -147,6 +147,7 @@ const App = () => {
             <h4>Members</h4>
             <input
               value={inviteEmail}
+              pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
               onChange={e => setInviteEmail(e.target.value)}
               placeholder="Enter Email"
             />
@@ -161,7 +162,7 @@ const App = () => {
         <div className="form-container">
           <h2>Invite Friend</h2>
           <form>
-            <input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} placeholder="Enter Email" />
+            <input value={inviteEmail} pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$" onChange={e => setInviteEmail(e.target.value)} placeholder="Enter Email" />
             <button type="button" onClick={() => inviteFriend(selectedLeague._id)}>Send Invite</button>
           </form>
         </div>
