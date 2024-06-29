@@ -28,6 +28,15 @@ const leagueSchema = new mongoose.Schema({
 
 const League = mongoose.model('League', leagueSchema);
 
+// Get all leagues
+app.get('/leagues', async (req, res) => {
+  try {
+    const leagues = await League.find();
+    res.status(200).json(leagues);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 // Create a new league
 app.post('/leagues', async (req, res) => {
   const newLeague = new League(req.body);
@@ -77,10 +86,10 @@ app.post('/leagues/invite/:id', async (req, res) => {
   }
 });
 
-// Get all leagues
-app.get('/leagues', async (req, res) => {
+// Get one leagues
+app.get('/leagues/:id', async (req, res) => {
   try {
-    const leagues = await League.find();
+    const leagues = await League.find(req.params.id);
     res.status(200).json(leagues);
   } catch (err) {
     res.status(500).json({ message: err.message });
