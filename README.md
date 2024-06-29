@@ -1,6 +1,9 @@
-see all data--- https://league-curd-frontend.vercel.app/
-backend datalistapi--- https://league-curd-backendapi.vercel.app/leagues
-individual id check-- https://league-curd-backendapi.vercel.app/leagues/<put_user_id>
+see all data--- 
+https://league-curd-frontend.vercel.app/
+backend datalistapi--- 
+https://league-curd-backendapi.vercel.app/leagues
+individual id check-- 
+https://league-curd-backendapi.vercel.app/leagues/<put_user_id>
 ![1](https://github.com/Sujitcs/League-curd/assets/132594980/ea04e36c-fb8f-4adc-86a7-69b636ab24e7)
 ![2](https://github.com/Sujitcs/League-curd/assets/132594980/e6a5287d-9e3a-4769-8c2e-5db868977e16)
 ![3](https://github.com/Sujitcs/League-curd/assets/132594980/15463d21-6aac-45ad-a318-843d50e4d6db)
