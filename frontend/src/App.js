@@ -69,7 +69,7 @@ const App = () => {
   };
 
   const deleteLeague = (id) => {
-    axios.delete(``${url}/leagues/${id}`)
+    axios.delete(`${url}/leagues/${id}`)
       .then(() => {
         fetchLeagues();
         closeForm();
