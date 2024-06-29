@@ -13,9 +13,9 @@ const App = () => {
   useEffect(() => {
     fetchLeagues();
   }, []);
-
+ const url="https://league-curd-backendapi.vercel.app";
   const fetchLeagues = () => {
-    axios.get('http://localhost:5000/leagues')
+    axios.get(`${url}/leagues`)
       .then(response => setLeagues(response.data))
       .catch(error => console.error(error));
   };
@@ -52,14 +52,14 @@ const App = () => {
     };
 
     if (selectedLeague) {
-      axios.put(`http://localhost:5000/leagues/${selectedLeague._id}`, updatedLeague)
+      axios.put(`${url}/leagues/${selectedLeague._id}`, updatedLeague)
         .then(response => {
           fetchLeagues();
           closeForm();
         })
         .catch(error => console.error(error));
     } else {
-      axios.post('http://localhost:5000/leagues', updatedLeague)
+      axios.post(`${url}/leagues`, updatedLeague)
         .then(response => {
           fetchLeagues();
           closeForm();
@@ -69,7 +69,7 @@ const App = () => {
   };
 
   const deleteLeague = (id) => {
-    axios.delete(`http://localhost:5000/leagues/${id}`)
+    axios.delete(``${url}/leagues/${id}`)
       .then(() => {
         fetchLeagues();
         closeForm();
@@ -90,7 +90,7 @@ const App = () => {
       return;
     }
   
-    axios.post(`http://localhost:5000/leagues/invite/${leagueId}`, { email: inviteEmail })
+    axios.post(`${url}/leagues/invite/${leagueId}`, { email: inviteEmail })
       .then(response => {
         fetchLeagues();
         closeForm();
