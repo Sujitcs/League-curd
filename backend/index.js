@@ -89,7 +89,7 @@ app.post('/leagues/invite/:id', async (req, res) => {
 // Get one leagues
 app.get('/leagues/:id', async (req, res) => {
   try {
-    const leagues = await League.find(req.params.id);
+    const leagues = await League.findById(req.params.id);
     res.status(200).json(leagues);
   } catch (err) {
     res.status(500).json({ message: err.message });
